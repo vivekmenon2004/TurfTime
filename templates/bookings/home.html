@@ -846,16 +846,16 @@
             <div class="col-lg-6">
                 <div class="images-section">
                     <div class="image-card top hero-animate delay-3">
-                        <img src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=800&h=600&fit=crop"
-                            alt="Football field at night" loading="lazy" crossorigin="anonymous">
+                        <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=600&fit=crop"
+                            alt="Professional football turf" loading="lazy" crossorigin="anonymous">
                     </div>
                     <div class="image-card middle hero-animate delay-4">
-                        <img src="{% static 'images/hero_basketball.png' %}" alt="Basketball court" loading="lazy"
-                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1531058020387-3be344556be6?w=600&h=400&fit=crop'">
+                        <img src="https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=600&h=400&fit=crop" 
+                            alt="Indoor basketball court" loading="lazy" crossorigin="anonymous">
                     </div>
                     <div class="image-card bottom hero-animate delay-5">
-                        <img src="{% static 'images/hero_tennis.png' %}" alt="Tennis court" loading="lazy"
-                            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1551698618-1dfe5d97d256?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600&q=80'">
+                        <img src="https://images.unsplash.com/photo-1595435066319-70dc7788276f?w=800&h=600&fit=crop" 
+                            alt="Top view tennis clay court" loading="lazy" crossorigin="anonymous">
                     </div>
                 </div>
             </div>
@@ -1139,9 +1139,9 @@
             img.addEventListener('error', function () {
                 // Try alternative image sources
                 const fallbacks = [
-                    'https://picsum.photos/800/600?random=1',
-                    'https://picsum.photos/600/400?random=2',
-                    'https://picsum.photos/800/600?random=3'
+                    'https://images.unsplash.com/photo-1544919982-b61976f0ba43?w=800&q=80',
+                    'https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=800&q=80',
+                    'https://images.unsplash.com/photo-1595435066319-70dc7788276f?w=800&q=80'
                 ];
                 if (index < fallbacks.length) {
                     this.src = fallbacks[index];
