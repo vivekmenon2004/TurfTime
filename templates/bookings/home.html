@@ -205,13 +205,15 @@
         height: 280px;
     }
 
-    /* Animations */    /* --- DYNAMIC JS ANIMATION STYLES --- */
+    /* Animations */
+    /* --- DYNAMIC JS ANIMATION STYLES --- */
     :root {
         --ball-size: 50px;
     }
 
     .hero-ball-container {
-        position: absolute; /* Absolute so it scrolls properly with the page */
+        position: absolute;
+        /* Absolute so it scrolls properly with the page */
         width: 100%;
         height: 100%;
         top: 0;
@@ -219,7 +221,8 @@
         pointer-events: none;
         z-index: 1000;
         overflow: visible;
-        display: none; /* Hidden until JS calculates positions */
+        display: none;
+        /* Hidden until JS calculates positions */
     }
 
     .hero-football-asset {
@@ -237,7 +240,7 @@
         position: absolute;
         width: var(--ball-size);
         height: 12px;
-        background: rgba(0,0,0,0.4);
+        background: rgba(0, 0, 0, 0.4);
         border-radius: 50%;
         filter: blur(5px);
         opacity: 0;
@@ -360,6 +363,7 @@
             transform: scale(1);
             opacity: 1;
         }
+
         to {
             transform: scale(0);
             opacity: 0;
@@ -381,6 +385,7 @@
             transform: translate(0, 0) scale(1);
             opacity: 1;
         }
+
         to {
             transform: translate(var(--dx), var(--dy)) scale(0);
             opacity: 0;
@@ -846,16 +851,14 @@
             <div class="col-lg-6">
                 <div class="images-section">
                     <div class="image-card top hero-animate delay-3">
-                        <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&fit=crop&v=5"
-                            alt="1">
+                        <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&fit=crop&sig=1"
+                            alt="Football Selection" crossorigin="anonymous">
                     </div>
                     <div class="image-card middle hero-animate delay-4">
-                        <img src="https://images.unsplash.com/photo-1544919982-b61976f0ba43?w=800&fit=crop&v=5" 
-                            alt="2">
+                        <img src="https://images.unsplash.com/photo-1543351611-58f69d7c1781?w=800&fit=crop" alt="Soccer Action">
                     </div>
                     <div class="image-card bottom hero-animate delay-5">
-                        <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&fit=crop&v=5" 
-                            alt="3">
+                        <img src="https://images.unsplash.com/photo-1595435066319-70dc7788276f?w=800&fit=crop" alt="Clay Tennis Court">
                     </div>
                 </div>
             </div>
@@ -1176,7 +1179,7 @@
         const shadow = document.getElementById('hero-ball-shadow');
         const targetBtn = document.getElementById('home-book-btn');
         const startLogo = document.getElementById('nav-logo');
-        
+
         let dustInterval;
         let isAnimating = false;
 
@@ -1190,14 +1193,14 @@
 
                 const startRect = startLogo.getBoundingClientRect();
                 const endRect = targetBtn.getBoundingClientRect();
-                
+
                 const scrollX = window.scrollX || document.documentElement.scrollLeft;
                 const scrollY = window.scrollY || document.documentElement.scrollTop;
 
                 // Start position (center of logo)
                 const startX = startRect.left + scrollX + (startRect.width / 2) - 25; // 25 is half of var(--ball-size)
                 const startY = startRect.top + scrollY + (startRect.height / 2) - 25;
-                
+
                 // End position (center/top of button)
                 const endX = endRect.left + scrollX + (endRect.width / 2) - 25;
                 const endY = endRect.top + scrollY - 45; // Land exactly on top of the button
@@ -1219,10 +1222,10 @@
                 // CRITICAL: Translate MUST come before rotate, otherwise it translates along the rotated axes!
                 const ballAnimation = ball.animate([
                     { transform: `translate(0px, 0px) scale(0.5) rotate(0deg)`, opacity: 0, filter: 'brightness(1) contrast(1) blur(0px)' },
-                    { transform: `translate(${(cpX - startX)*0.3}px, ${(cpY - startY)*0.8}px) scale(1) rotate(90deg)`, opacity: 1, filter: 'brightness(1.1) contrast(1.1) blur(2px)', offset: 0.2 },
+                    { transform: `translate(${(cpX - startX) * 0.3}px, ${(cpY - startY) * 0.8}px) scale(1) rotate(90deg)`, opacity: 1, filter: 'brightness(1.1) contrast(1.1) blur(2px)', offset: 0.2 },
                     { transform: `translate(${(cpX - startX)}px, ${(cpY - startY)}px) scale(1.5) rotate(270deg)`, opacity: 1, filter: 'brightness(1.4) contrast(1.2) blur(4px)', offset: 0.5 },
-                    { transform: `translate(${(endX - startX)*0.8}px, ${(endY - startY)*0.4}px) scale(1) rotate(600deg)`, opacity: 1, filter: 'brightness(1.1) contrast(1) blur(2px)', offset: 0.8 },
-                    { transform: `translate(${(endX - startX)*0.95}px, ${(endY - startY)*0.95}px) scale(0.85) rotate(700deg)`, opacity: 1, filter: 'brightness(1) contrast(1) blur(1px)', offset: 0.95 },
+                    { transform: `translate(${(endX - startX) * 0.8}px, ${(endY - startY) * 0.4}px) scale(1) rotate(600deg)`, opacity: 1, filter: 'brightness(1.1) contrast(1) blur(2px)', offset: 0.8 },
+                    { transform: `translate(${(endX - startX) * 0.95}px, ${(endY - startY) * 0.95}px) scale(0.85) rotate(700deg)`, opacity: 1, filter: 'brightness(1) contrast(1) blur(1px)', offset: 0.95 },
                     { transform: `translate(${endX - startX}px, ${endY - startY}px) scale(1) rotate(750deg)`, opacity: 1, filter: 'brightness(1) contrast(1) blur(0px)' }
                 ], {
                     duration: duration,
@@ -1250,7 +1253,7 @@
                 ballAnimation.onfinish = () => {
                     clearInterval(dustInterval);
                     createHeroExplosion(endX, endY);
-                    
+
                     // Button Pop
                     targetBtn.style.transition = 'transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                     targetBtn.style.transform = 'scale(1.08) rotate(-2deg)';
@@ -1266,7 +1269,7 @@
             // Get accurate current transform matrix
             const style = window.getComputedStyle(ball);
             const matrix = new DOMMatrixReadOnly(style.transform);
-            
+
             // If still starting, matrix might be identity
             if (matrix.m41 === 0 && matrix.m42 === 0 && style.opacity === '0') return;
 
@@ -1279,7 +1282,7 @@
             dust.style.left = `${x + (Math.random() * 20 - 10) - 7.5}px`;
             dust.style.top = `${y + (Math.random() * 20 - 10) - 7.5}px`;
             dust.style.animation = `dustFade 0.6s ease-out forwards`;
-            
+
             container.appendChild(dust);
             setTimeout(() => dust.remove(), 600);
         }
@@ -1288,23 +1291,23 @@
             for (let i = 0; i < 40; i++) { // Massive explosion
                 const particle = document.createElement('div');
                 particle.className = 'particle';
-                
+
                 // Blast heavily to the left and up
-                const angle = Math.PI + (Math.random() * Math.PI) - (Math.PI / 4); 
+                const angle = Math.PI + (Math.random() * Math.PI) - (Math.PI / 4);
                 const distance = 50 + Math.random() * 120;
                 const dx = Math.cos(angle) * distance;
                 const dy = (Math.sin(angle) * distance) - 40; // High upward bias
-                
+
                 particle.style.setProperty('--dx', `${dx}px`);
                 particle.style.setProperty('--dy', `${dy}px`);
                 particle.style.left = `${impactX + 15}px`; // Center of impact
                 particle.style.top = `${impactY + 25}px`;
-                
+
                 const colors = ['#22c55e', '#16a34a', '#86efac', '#f0fdf4', '#fbbf24', '#ffffff'];
                 particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                
+
                 particle.style.animation = `particleOut ${0.5 + Math.random() * 0.8}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
-                
+
                 container.appendChild(particle);
                 setTimeout(() => particle.remove(), 1500);
             }
