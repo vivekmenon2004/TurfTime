@@ -1,0 +1,88 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Revenue Report - Admin{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4">Revenue Report</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3>Total Revenue</h3>
+                    <h1 class="display-4">₹{{ total_revenue|floatformat:2 }}</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Revenue by Turf</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Turf</th>
+                                    <th>Bookings</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in turf_revenue %}
+                                <tr>
+                                    <td>{{ item.name }}</td>
+                                    <td>{{ item.booking_count }}</td>
+                                    <td>₹{{ item.revenue|default:"0.00" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Transactions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Turf</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for t in transactions %}
+                                <tr>
+                                    <td>#{{ t.turf_id }}</td>
+                                    <td>{{ t.turf.name }}</td>
+                                    <td>₹{{ t.total_price }}</td>
+                                    <td>{{ t.updated_at|date:"M d" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

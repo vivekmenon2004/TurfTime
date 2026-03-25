@@ -1,0 +1,40 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Cancel Booking{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Cancel Booking</h4>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to {% if is_owner %}reject/cancel{% else %}cancel{% endif %} this booking?</p>
+                    <div class="mb-3">
+                        <strong>Turf:</strong> {{ booking.turf.name }}<br>
+                        <strong>Date:</strong> {{ booking.date }}<br>
+                        <strong>Time:</strong> {{ booking.start_time }} - {{ booking.end_time }}<br>
+                        <strong>Price:</strong> ₹{{ booking.total_price }}
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        {% if is_owner %}
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for rejection (Optional)</label>
+                            <input type="text" class="form-control" id="reason" name="reason" placeholder="e.g. Turf maintenance, double booking, etc.">
+                        </div>
+                        <button type="submit" class="btn btn-danger">Yes, Reject Booking</button>
+                        {% else %}
+                        <button type="submit" class="btn btn-danger">Yes, Cancel Booking</button>
+                        {% endif %}
+                        <a href="{% url 'booking_detail' booking.booking_id %}" class="btn btn-outline-secondary">No, Go Back</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

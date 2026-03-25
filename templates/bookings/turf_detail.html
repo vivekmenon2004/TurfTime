@@ -1,0 +1,202 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}{{ turf.name }} - TurfTime{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                {% if turf.images.first %}
+                <img src="{{ turf.images.first.image.url }}" class="card-img-top" alt="{{ turf.name }}"
+                    style="height: 400px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h2>{{ turf.name }}</h2>
+                    <p class="text-muted">
+                        <i class="bi bi-geo-alt"></i> {{ turf.location }}
+                        {% if turf.google_map_link %}
+                        <a href="{{ turf.google_map_link }}" target="_blank" class="ms-2 btn btn-sm btn-outline-primary py-0">
+                            <i class="bi bi-map"></i> View on Maps
+                        </a>
+                        {% endif %}
+                        <br>
+                        <i class="bi bi-trophy"></i> {{ turf.get_sport_types_display }}<br>
+                        <i class="bi bi-clock"></i> {{ turf.opening_time }} - {{ turf.closing_time }}
+                    </p>
+                    <div class="mb-3">
+                        <h4>₹{{ turf.base_price_per_hour }}/hour</h4>
+                        <small class="text-muted">Base price (peak hours and weekends may have additional
+                            charges)</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Amenities:</h6>
+                        {% for amenity in turf.get_amenities_list %}
+                        <span class="badge bg-light text-dark me-2">{{ amenity|title }}</span>
+                        {% endfor %}
+                    </div>
+                    {% if avg_rating %}
+                    <div class="mb-3">
+                        <h6>Rating: {{ avg_rating|floatformat:1 }}/5.0</h6>
+                        <div>
+                            {% for i in "12345" %}
+                            {% if forloop.counter <= avg_rating %} <i class="bi bi-star-fill text-warning"></i>
+                                {% else %}
+                                <i class="bi bi-star text-warning"></i>
+                                {% endif %}
+                                {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>Reviews</h5>
+                </div>
+                <div class="card-body">
+                    {% if reviews %}
+                    {% for review in reviews %}
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ review.user.username }}</strong>
+                            <div>
+                                {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %} <i class="bi bi-star-fill text-warning"></i>
+                                    {% else %}
+                                    <i class="bi bi-star text-warning"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                            </div>
+                        </div>
+                        <p class="mb-0">{{ review.comment }}</p>
+                        <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted">No reviews yet.</p>
+                    {% endif %}
+                    {% if can_review %}
+                    <a href="{% url 'add_review' turf.turf_id %}" class="btn btn-outline-custom">Add Review</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Availability - Next 7 Days</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">Select a date to see available slots. Only slots within operating
+                        hours are shown.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Date:</label>
+                        <input type="date" id="view_date" class="form-control" value="{% now 'Y-m-d' %}"
+                            min="{% now 'Y-m-d' %}">
+                    </div>
+                    <div id="availability-slots-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const dateInput = document.getElementById('view_date');
+                const slotsContainer = document.getElementById('availability-slots-container');
+
+                dateInput.addEventListener('change', fetchViewSlots);
+                fetchViewSlots();
+
+                async function fetchViewSlots() {
+                    const dateVal = dateInput.value;
+                    if (!dateVal) {
+                        slotsContainer.innerHTML = '';
+                        return;
+                    }
+                    try {
+                        const response = await fetch(`/api/slots/{{ turf.turf_id }}/?date=${dateVal}`);
+                        const data = await response.json();
+                        if (data.slots) {
+                            renderViewSlots(data.slots);
+                        }
+                    } catch (e) {
+                        console.error('Error fetching slots', e);
+                    }
+                }
+
+                function renderViewSlots(slots) {
+                    slotsContainer.innerHTML = '';
+
+                    const legend = document.createElement('div');
+                    legend.className = 'w-100 d-flex gap-3 mb-3 small text-muted';
+                    legend.innerHTML = `
+                        <div><span class="d-inline-block rounded border border-success bg-white" style="width:12px; height:12px;"></span> Available</div>
+                        <div><span class="d-inline-block rounded bg-warning text-dark" style="width:12px; height:12px;"></span> Blocked</div>
+                        <div><span class="d-inline-block rounded bg-secondary" style="width:12px; height:12px;"></span> Booked</div>
+                    `;
+                    slotsContainer.appendChild(legend);
+
+                    const btnContainer = document.createElement('div');
+                    btnContainer.className = 'd-flex flex-wrap gap-2';
+                    slotsContainer.appendChild(btnContainer);
+
+                    slots.forEach(slot => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.disabled = true;
+
+                        if (slot.available) {
+                            btn.className = 'btn btn-sm btn-outline-success opacity-100'; // Make it look active but unclickable
+                        } else if (slot.is_blocked) {
+                            btn.className = 'btn btn-sm btn-warning text-dark opacity-100';
+                            btn.title = "Blocked by owner";
+                        } else {
+                            btn.className = 'btn btn-sm btn-secondary text-white opacity-100';
+                            btn.title = "Already booked";
+                        }
+
+                        btn.innerText = `${slot.start} - ${slot.end}`;
+                        btnContainer.appendChild(btn);
+                    });
+
+                    if (slots.length === 0) {
+                        slotsContainer.innerHTML += '<p class="text-muted">No slots available for this date.</p>';
+                    }
+                }
+            });
+        </script>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Book This Turf</h5>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'book_turf' turf.turf_id %}" class="btn btn-primary-custom w-100 mb-3">Book Now</a>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary-custom w-100 mb-3">Login to Book</a>
+                    {% endif %}
+                    <p class="small text-muted">
+                        <strong>Pricing:</strong><br>
+                        Base: ₹{{ turf.base_price_per_hour }}/hour<br>
+                        Peak hours (6 PM - 10 PM): {{ turf.peak_hour_multiplier }}x<br>
+                        Weekend: {{ turf.weekend_multiplier }}x
+                    </p>
+                </div>
+            </div>
+
+            {% if user == turf.owner %}
+            <div class="card">
+                <div class="card-body">
+                    <h6>Owner Actions</h6>
+                    <a href="{% url 'edit_turf' turf.turf_id %}" class="btn btn-outline-custom w-100 mb-2">Edit Turf</a>
+                    <a href="{% url 'manage_bookings' turf.turf_id %}" class="btn btn-outline-custom w-100 mb-2">Manage
+                        Bookings</a>
+                    <a href="{% url 'block_slot' turf.turf_id %}" class="btn btn-outline-custom w-100">Block Slot</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

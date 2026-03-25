@@ -1,0 +1,44 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}My Turfs - TurfTime{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Turfs</h2>
+        <a href="{% url 'add_turf' %}" class="btn btn-primary-custom">Add New Turf</a>
+    </div>
+    
+    <div class="row">
+        {% for turf in turfs %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if turf.images.first %}
+                <img src="{{ turf.images.first.image.url }}" class="card-img-top" alt="{{ turf.name }}" style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ turf.name }}</h5>
+                    <p class="text-muted">{{ turf.location }} - {{ turf.get_sport_types_display }}</p>
+                    <p><strong>₹{{ turf.base_price_per_hour }}/hour</strong></p>
+                    {% if turf.is_approved %}
+                    <span class="badge bg-success mb-2">Approved</span>
+                    {% else %}
+                    <span class="badge bg-warning mb-2">Pending Approval</span>
+                    {% endif %}
+                    <div class="mt-3">
+                        <a href="{% url 'turf_detail' turf.turf_id %}" class="btn btn-sm btn-outline-primary">View</a>
+                        <a href="{% url 'edit_turf' turf.turf_id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <a href="{% url 'manage_bookings' turf.turf_id %}" class="btn btn-sm btn-outline-info">Bookings</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">No turfs yet. <a href="{% url 'add_turf' %}">Add your first turf</a></div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

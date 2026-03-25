@@ -1,0 +1,62 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Booking Details - TurfTime{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary-custom text-white">
+                    <h4 class="mb-0">Booking Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Turf:</strong> {{ booking.turf.name }}<br>
+                            <strong>Location:</strong> {{ booking.turf.location }}<br>
+                            <strong>Sport Playing:</strong> {{ booking.sport.name }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Date:</strong> {{ booking.date }}<br>
+                            <strong>Time:</strong> {{ booking.start_time }} - {{ booking.end_time }}<br>
+                            <strong>Status:</strong> 
+                            <span class="badge bg-{{ booking.status|lower }}">{{ booking.get_status_display }}</span><br>
+                            <strong>Payment:</strong>
+                            <span class="badge bg-{% if booking.payment_status == 'PAID' %}success{% else %}warning{% endif %}">{{ booking.payment_status|title }}</span>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <h5>Total Price: ₹{{ booking.total_price }}</h5>
+                    </div>
+                    {% if booking.qr_code %}
+                    <div class="mb-3 text-center">
+                        <h6>QR Code</h6>
+                        <img src="{{ booking.qr_code.url }}" alt="QR Code" class="img-fluid" style="max-width: 200px;">
+                    </div>
+                    {% endif %}
+                    <div class="d-flex gap-2">
+                        {% if not is_past %}
+                            {% if booking.user == user and booking.status != 'CANCELLED' and booking.status != 'COMPLETED' %}
+                            <a href="{% url 'cancel_booking' booking.booking_id %}" class="btn btn-outline-danger">Cancel Booking</a>
+                            {% endif %}
+                            
+                            {% if booking.turf.owner == user %}
+                                {% if booking.status == 'PENDING' %}
+                                <a href="{% url 'confirm_booking' booking.booking_id %}" class="btn btn-success">Confirm Booking</a>
+                                {% endif %}
+                                {% if booking.status != 'CANCELLED' and booking.status != 'COMPLETED' %}
+                                <a href="{% url 'cancel_booking' booking.booking_id %}" class="btn btn-danger">Reject Booking</a>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

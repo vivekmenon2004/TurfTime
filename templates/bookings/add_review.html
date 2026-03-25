@@ -1,0 +1,38 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Add Review - {{ turf.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary-custom text-white">
+                    <h4 class="mb-0">Review {{ turf.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_rating" class="form-label">Rating (1-5)</label>
+                            {{ form.rating }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_comment" class="form-label">Comment</label>
+                            {{ form.comment }}
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100">Submit Review</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input, textarea').forEach(el => {
+        el.classList.add('form-control');
+    });
+</script>
+{% endblock %}
+

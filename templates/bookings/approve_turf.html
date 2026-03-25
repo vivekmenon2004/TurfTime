@@ -1,0 +1,31 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Approve Turf{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Approve Turf</h4>
+                </div>
+                <div class="card-body">
+                    <p>Approve this turf for public listing?</p>
+                    <div class="mb-3">
+                        <strong>Name:</strong> {{ turf.name }}<br>
+                        <strong>Location:</strong> {{ turf.location }}<br>
+                        <strong>Sport:</strong> {{ turf.get_sport_types_display }}<br>
+                        <strong>Owner:</strong> {{ turf.owner.username }}
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success w-100">Approve Turf</button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

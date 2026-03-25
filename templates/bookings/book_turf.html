@@ -1,0 +1,154 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Book {{ turf.name }} - TurfTime{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary-custom text-white">
+                    <h4 class="mb-0">Book {{ turf.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label for="id_sport" class="form-label">Sport You Are Playing</label>
+                            {{ form.sport }}
+                            {% if form.sport.errors %}
+                            <div class="text-danger">{{ form.sport.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_date" class="form-label">Date</label>
+                            {{ form.date }}
+                            {% if form.date.errors %}
+                            <div class="text-danger">{{ form.date.errors }}</div>
+                            {% endif %}
+                            <div id="slots-container" class="mt-3"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_start_time" class="form-label">Start Time</label>
+                            {{ form.start_time }}
+                            {% if form.start_time.errors %}
+                            <div class="text-danger">{{ form.start_time.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_end_time" class="form-label">End Time</label>
+                            {{ form.end_time }}
+                            {% if form.end_time.errors %}
+                            <div class="text-danger">{{ form.end_time.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="alert alert-info">
+                            <strong>Operating Hours:</strong> {{ turf.opening_time }} - {{ turf.closing_time }}<br>
+                            <strong>Base Price:</strong> ₹{{ turf.base_price_per_hour }}/hour
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100">Book Now</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input').forEach(el => {
+        el.classList.add('form-control');
+    });
+
+    // Slot picker logic
+    const dateInput = document.getElementById('id_date');
+    const startTimeInput = document.getElementById('id_start_time');
+    const endTimeInput = document.getElementById('id_end_time');
+    const slotsContainer = document.getElementById('slots-container');
+
+    if (dateInput) {
+        dateInput.addEventListener('change', fetchSlots);
+        // Fetch slots if date is already populated (e.g. on form validation error)
+        if (dateInput.value) {
+            fetchSlots();
+        }
+    }
+
+    async function fetchSlots() {
+        const dateVal = dateInput.value;
+        if (!dateVal) {
+            slotsContainer.innerHTML = '';
+            return;
+        }
+        try {
+            const response = await fetch(`/api/slots/{{ turf.turf_id }}/?date=${dateVal}`);
+            const data = await response.json();
+            if (data.slots) {
+                renderSlots(data.slots);
+            }
+        } catch (e) {
+            console.error('Error fetching slots', e);
+        }
+    }
+
+    function renderSlots(slots) {
+        slotsContainer.innerHTML = '';
+
+        const legend = document.createElement('div');
+        legend.className = 'w-100 d-flex gap-3 mb-2 small text-muted';
+        legend.innerHTML = `
+            <div><span class="d-inline-block rounded border border-success bg-white" style="width:12px; height:12px;"></span> Available</div>
+            <div><span class="d-inline-block rounded bg-warning text-dark" style="width:12px; height:12px;"></span> Blocked</div>
+            <div><span class="d-inline-block rounded bg-secondary" style="width:12px; height:12px;"></span> Booked</div>
+        `;
+        slotsContainer.appendChild(legend);
+
+        const btnContainer = document.createElement('div');
+        btnContainer.className = 'd-flex flex-wrap gap-2';
+        slotsContainer.appendChild(btnContainer);
+
+        slots.forEach(slot => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+
+            if (slot.available) {
+                btn.className = 'btn btn-sm btn-outline-success';
+            } else if (slot.is_blocked) {
+                btn.className = 'btn btn-sm btn-warning text-dark';
+                btn.disabled = true;
+                btn.title = "Blocked by owner";
+            } else {
+                btn.className = 'btn btn-sm btn-secondary text-white';
+                btn.disabled = true;
+                btn.title = "Already booked";
+            }
+
+            btn.innerText = `${slot.start} - ${slot.end}`;
+
+            if (slot.available) {
+                btn.onclick = () => {
+                    startTimeInput.value = slot.start;
+                    endTimeInput.value = slot.end;
+
+                    Array.from(btnContainer.querySelectorAll('.btn')).forEach(b => {
+                        if (b.classList.contains('btn-success')) {
+                            b.classList.replace('btn-success', 'btn-outline-success');
+                            b.classList.remove('text-white');
+                        }
+                    });
+                    btn.classList.replace('btn-outline-success', 'btn-success');
+                    btn.classList.add('text-white');
+                };
+            }
+
+            btnContainer.appendChild(btn);
+        });
+    }
+</script>
+{% endblock %}

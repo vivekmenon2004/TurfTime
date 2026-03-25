@@ -1,0 +1,341 @@
+{% extends 'bookings/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - TurfTime{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- PREMIUM APPLE-STYLE ANIMATION --- */
+    :root {
+        --ball-size: 42px;
+        --spring-easing: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --smooth-easing: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes realisticShot {
+        0% {
+            opacity: 0;
+            left: 2%;
+            top: 25px;
+            transform: scale(0.5) rotate(0deg);
+            filter: brightness(1) contrast(1);
+        }
+        10% { opacity: 1; }
+        45% {
+            top: -85px; /* Higher realistic loft */
+            transform: scale(1.4) rotate(180deg);
+            filter: brightness(1.2) contrast(1.1); /* Light reflection at peak */
+        }
+        85% {
+            opacity: 1;
+            transform: scale(1.1) rotate(340deg);
+        }
+        95% {
+            transform: scale(0.9) rotate(360deg); /* Slight squash before impact */
+        }
+        100% {
+            opacity: 1;
+            left: calc(100% - 100px);
+            top: -24px;
+            transform: scale(1.2) rotate(380deg); /* Impact bounce */
+            filter: brightness(1) contrast(1);
+        }
+    }
+
+    @keyframes ballSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(720deg); }
+    }
+
+    @keyframes shadowMove {
+        0% { transform: scale(0.5); opacity: 0.2; left: 2%; }
+        45% { transform: scale(0.3); opacity: 0.1; left: 50%; }
+        100% { transform: scale(0.8); opacity: 0.4; left: calc(100% - 100px); }
+    }
+
+    .ball-container {
+        position: absolute;
+        width: 100%;
+        height: 80px;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 1000;
+    }
+
+    .football-pro-asset {
+        position: absolute;
+        width: var(--ball-size);
+        height: var(--ball-size);
+        opacity: 0;
+        clip-path: circle(42%);
+        -webkit-clip-path: circle(42%);
+        object-fit: cover;
+        animation: realisticShot 2.5s var(--spring-easing) forwards;
+        animation-delay: 0.8s;
+        filter: drop-shadow(0 15px 25px rgba(0,0,0,0.5));
+        will-change: transform, left, top, opacity;
+    }
+
+    /* Particle Explosion Styles */
+    .ball-shadow {
+        position: absolute;
+        width: 30px;
+        height: 10px;
+        background: rgba(0,0,0,0.3);
+        border-radius: 50%;
+        bottom: 10px;
+        filter: blur(4px);
+        animation: shadowMove 2.5s var(--smooth-easing) forwards;
+        animation-delay: 0.8s;
+        pointer-events: none;
+    }
+
+    .particle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: var(--primary-green);
+        border-radius: 50%;
+        pointer-events: none;
+        opacity: 0;
+    }
+
+    @keyframes particleOut {
+        0% { transform: translate(0, 0) scale(1); opacity: 1; }
+        100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+    }
+
+    @media (max-width: 768px) {
+        @keyframes realisticShotMobile {
+            0% { opacity: 0; left: 50%; top: -100px; transform: translateX(-50%) scale(0.5); }
+            100% { opacity: 1; left: 50%; top: -24px; transform: translateX(-50%) scale(1.2); }
+        }
+        .football-pro-asset {
+            animation-name: realisticShotMobile;
+            animation-duration: 1.8s;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+
+    <!-- Header Row -->
+    <div class="dashboard-header-row d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+        <div class="ball-container">
+            <!-- Photorealistic 3D Asset with CSS Clipping for 100% Clean Background -->
+            <div class="ball-shadow"></div>
+            <img src="{% static 'images/football_pro.png' %}" alt="3D Football" class="football-pro-asset">
+        </div>
+        
+        <h2 class="mb-0 fw-bold">Welcome, <span class="text-success">{{ user.username }}</span>!</h2>
+        <div class="d-flex gap-2">
+            <a href="{% url 'search_turfs' %}" id="book-turf-btn" class="btn btn-primary-custom btn-blink px-4 py-2 fw-semibold">Book a Turf</a>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body py-2">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small mb-1">Filter by Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All Statuses</option>
+                        <option value="PENDING"   {% if current_status == 'PENDING' %}selected{% endif %}>Pending</option>
+                        <option value="CONFIRMED" {% if current_status == 'CONFIRMED' %}selected{% endif %}>Confirmed</option>
+                        <option value="CANCELLED" {% if current_status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                        <option value="COMPLETED" {% if current_status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small mb-1">Filter by Date</label>
+                    <input type="date" name="date" class="form-control form-control-sm" value="{{ current_date }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-sm btn-primary-custom w-100">Search</button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-secondary w-100">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Upcoming Bookings Table -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h5 class="fw-bold mb-0 text-success">Upcoming Bookings</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if upcoming_bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Booking ID</th>
+                            <th>Turf</th>
+                            <th>Sport</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Price</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in upcoming_bookings %}
+                        <tr>
+                            <td class="ps-3 text-muted small">#{{ booking.booking_id }}</td>
+                            <td class="fw-semibold">{{ booking.turf.name }}</td>
+                            <td>{{ booking.sport.name }}</td>
+                            <td>{{ booking.date }}</td>
+                            <td class="text-nowrap">{{ booking.start_time|time:"H:i" }} – {{ booking.end_time|time:"H:i" }}</td>
+                            <td class="fw-semibold text-success">₹{{ booking.total_price }}</td>
+                            <td>
+                                {% if booking.payment_status == 'PAID' %}
+                                <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">{{ booking.get_payment_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="badge bg-{{ booking.status|lower }}">{{ booking.get_status_display }}</span></td>
+                            <td><a href="{% url 'booking_detail' booking.booking_id %}" class="btn btn-sm btn-outline-success">View</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-calendar-check fs-1 text-muted"></i>
+                <p class="text-muted mt-2 mb-0">No upcoming bookings{% if current_status or current_date %} for this filter{% endif %}.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- All / Past Bookings Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="fw-bold mb-0 text-secondary">All Booking History</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if past_bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Booking ID</th>
+                            <th>Turf</th>
+                            <th>Sport</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Price</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in past_bookings %}
+                        <tr>
+                            <td class="ps-3 text-muted small">#{{ booking.booking_id }}</td>
+                            <td class="fw-semibold">{{ booking.turf.name }}</td>
+                            <td>{{ booking.sport.name }}</td>
+                            <td>{{ booking.date }}</td>
+                            <td class="text-nowrap">{{ booking.start_time|time:"H:i" }} – {{ booking.end_time|time:"H:i" }}</td>
+                            <td class="fw-semibold text-success">₹{{ booking.total_price }}</td>
+                            <td>
+                                {% if booking.payment_status == 'PAID' %}
+                                <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">{{ booking.get_payment_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="badge bg-{{ booking.status|lower }}">{{ booking.get_status_display }}</span></td>
+                            <td><a href="{% url 'booking_detail' booking.booking_id %}" class="btn btn-sm btn-outline-secondary">View</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-clock-history fs-1 text-muted"></i>
+                <p class="text-muted mt-2 mb-0">No bookings found{% if current_status or current_date %} for this filter{% endif %}.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const ball = document.querySelector('.football-pro-asset');
+        const container = document.querySelector('.ball-container');
+        const targetBtn = document.getElementById('book-turf-btn');
+
+        if (ball && container) {
+            // Trigger explosion exactly on impact
+            // Animation duration is 2.5s, delay is 0.8s -> total 3.3s
+            setTimeout(() => {
+                createExplosion();
+                // Add a little pop effect to the button
+                if (targetBtn) {
+                    targetBtn.style.transition = 'transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    targetBtn.style.transform = 'scale(1.1) rotate(-2deg)';
+                    setTimeout(() => {
+                        targetBtn.style.transform = '';
+                    }, 150);
+                }
+            }, 3300);
+        }
+
+        function createExplosion() {
+            if (!targetBtn || !container) return;
+            
+            const rect = targetBtn.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            // Calculate impact point relative to container
+            // The ball hits near the left side of the button in the animation
+            const x = rect.left - containerRect.left + (rect.width * 0.2); 
+            const y = rect.top - containerRect.top + (rect.height * 0.5);
+
+            for (let i = 0; i < 28; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random directions and distances
+                const angle = (Math.random() * Math.PI) - (Math.PI / 2); // Explode outwards and slightly up
+                const distance = 30 + Math.random() * 80;
+                const dx = Math.cos(angle) * distance;
+                const dy = (Math.sin(angle) * distance) - 20; // Upward bias
+                
+                particle.style.setProperty('--dx', `${dx}px`);
+                particle.style.setProperty('--dy', `${dy}px`);
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                
+                // Green and Light variations for turf/energy effect
+                const colors = ['#22c55e', '#16a34a', '#86efac', '#f0fdf4', '#fbbf24']; // Added a bit of gold for spark
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.animation = `particleOut ${0.5 + Math.random() * 0.5}s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
+                
+                container.appendChild(particle);
+                
+                // Cleanup
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+    });
+</script>
+{% endblock %}

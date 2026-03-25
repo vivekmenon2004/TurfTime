@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Booking Report</title>
+    <style>
+        body { font-family: Helvetica, sans-serif; font-size: 12px; }
+        h1 { text-align: center; color: #15803d; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dddddd; padding: 8px; text-align: left; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>TurfTime Full Booking Report</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Turf</th>
+                <th>Sport</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Price</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in bookings %}
+            <tr>
+                <td>{{ b.booking_id }}</td>
+                <td>{{ b.user.username }}</td>
+                <td>{{ b.turf.name }}</td>
+                <td>{{ b.sport.name|default:"N/A" }}</td>
+                <td>{{ b.date }}</td>
+                <td>{{ b.start_time|time:"H:i" }} - {{ b.end_time|time:"H:i" }}</td>
+                <td>₹{{ b.total_price }}</td>
+                <td>{{ b.get_status_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

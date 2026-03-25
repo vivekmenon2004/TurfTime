@@ -1,0 +1,46 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Block Slot - {{ turf.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">Block Slot - {{ turf.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_date" class="form-label">Date</label>
+                            {{ form.date }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_start_time" class="form-label">Start Time</label>
+                            {{ form.start_time }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_end_time" class="form-label">End Time</label>
+                            {{ form.end_time }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_reason" class="form-label">Reason (Optional)</label>
+                            {{ form.reason }}
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">Block Slot</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input').forEach(el => {
+        el.classList.add('form-control');
+    });
+</script>
+{% endblock %}
+

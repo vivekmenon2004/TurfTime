@@ -1,0 +1,161 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Owner Dashboard - TurfTime{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4 fw-bold">Owner Dashboard</h2>
+
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-success fw-bold">{{ turfs.count }}</h3>
+                    <p class="mb-0 text-muted">Total Turfs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-success fw-bold">₹{{ total_earnings|floatformat:0 }}</h3>
+                    <p class="mb-0 text-muted">Total Earnings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-info fw-bold">₹{{ monthly_earnings|floatformat:0 }}</h3>
+                    <p class="mb-0 text-muted">This Month</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h3 class="text-warning fw-bold">{{ pending_count }}</h3>
+                    <p class="mb-0 text-muted">Pending Bookings</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Turfs Row -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="text-success fw-bold mb-0">My Turfs</h5>
+            <a href="{% url 'add_turf' %}" class="btn btn-sm btn-primary-custom">+ Add New Turf</a>
+        </div>
+        <div class="card-body">
+            {% if turfs %}
+            <div class="row g-3">
+                {% for turf in turfs %}
+                <div class="col-md-4">
+                    <a href="{% url 'turf_detail' turf.turf_id %}" class="text-decoration-none">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="fw-semibold text-dark">{{ turf.name }}</h6>
+                                    {% if turf.is_approved %}
+                                    <span class="badge bg-success">Approved</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">Pending Approval</span>
+                                    {% endif %}
+                                </div>
+                                <p class="mb-1 small text-muted">{{ turf.location }}</p>
+                                <a href="{% url 'turf_detail' turf.turf_id %}" class="btn btn-sm btn-outline-success mt-2">Manage Turf</a>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No turfs yet. Add your first turf!</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body py-2">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small mb-1">Filter by Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All Statuses</option>
+                        <option value="PENDING"   {% if current_status == 'PENDING'   %}selected{% endif %}>Pending</option>
+                        <option value="CONFIRMED" {% if current_status == 'CONFIRMED' %}selected{% endif %}>Confirmed</option>
+                        <option value="CANCELLED" {% if current_status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                        <option value="COMPLETED" {% if current_status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold small mb-1">Filter by Date</label>
+                    <input type="date" name="date" class="form-control form-control-sm" value="{{ current_date }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-sm btn-primary-custom w-100">Search</button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-secondary w-100">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- All Bookings Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="text-success fw-bold mb-0">All Bookings (Recent First)</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Turf</th>
+                            <th>Customer</th>
+                            <th>Sport</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td class="ps-3 fw-semibold">{{ booking.turf.name }}</td>
+                            <td>{{ booking.user.username }}</td>
+                            <td>{{ booking.sport.name }}</td>
+                            <td>{{ booking.date }}</td>
+                            <td>{{ booking.start_time|time:"H:i" }} – {{ booking.end_time|time:"H:i" }}</td>
+                            <td class="fw-semibold text-success">₹{{ booking.total_price }}</td>
+                            <td><span class="badge bg-{{ booking.status|lower }}">{{ booking.get_status_display }}</span></td>
+                            <td>
+                                <a href="{% url 'booking_detail' booking.booking_id %}" class="btn btn-sm btn-outline-success">View</a>
+                                {% if booking.status == 'PENDING' %}
+                                <a href="{% url 'confirm_booking' booking.booking_id %}" class="btn btn-sm btn-success ms-1">Confirm</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x fs-1 text-muted"></i>
+                <p class="text-muted mt-3">No bookings{% if current_status or current_date %} match your filter{% endif %}.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Add Turf - TurfTime{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary-custom text-white">
+                    <h4 class="mb-0">Add New Turf</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_name" class="form-label">Turf Name</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_location" class="form-label">Location (City)</label>
+                            {{ form.location }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_google_map_link" class="form-label">Google Maps Link</label>
+                            {{ form.google_map_link }}
+                            <div class="form-text text-muted small">Provide the URL from Google Maps for this turf's location.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_image" class="form-label">Turf Image</label>
+                            {{ form.image }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sport Types</label>
+                            <p class="form-text text-muted small mb-2">Select all sports that can be played at this turf.</p>
+                            <div>{{ form.sports }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_opening_time" class="form-label">Opening Time</label>
+                                {{ form.opening_time }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_closing_time" class="form-label">Closing Time</label>
+                                {{ form.closing_time }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="id_base_price_per_hour" class="form-label">Base Price/Hour (₹)</label>
+                                {{ form.base_price_per_hour }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="id_peak_hour_multiplier" class="form-label">Peak Hour Multiplier</label>
+                                {{ form.peak_hour_multiplier }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="id_weekend_multiplier" class="form-label">Weekend Multiplier</label>
+                                {{ form.weekend_multiplier }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amenities</label>
+                            <div>{{ form.amenities }}</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100">Submit for Approval</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input, select').forEach(el => {
+        if (el.type !== 'checkbox' && !el.classList.contains('form-select')) {
+            el.classList.add('form-control');
+        }
+    });
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script>
+    new TomSelect("#id_sports", {
+        plugins: ['remove_button'],
+        placeholder: "Select sports (e.g., Football, Cricket...)",
+        create: false
+    });
+    new TomSelect("#id_amenities", {
+        plugins: ['remove_button'],
+        placeholder: "Select amenities (e.g., Floodlights, Parking...)",
+        create: false
+    });
+</script>
+{% endblock %}
+

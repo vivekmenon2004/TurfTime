@@ -1,0 +1,68 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}Search Turfs - TurfTime{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4">Find Your Perfect Turf</h2>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-5">
+                    {{ form.location }}
+                </div>
+                <div class="col-md-5">
+                    {{ form.sport_type }}
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary-custom w-100">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% for turf in turfs %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if turf.images.first %}
+                <img src="{{ turf.images.first.image.url }}" class="card-img-top" alt="{{ turf.name }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="bi bi-image" style="font-size: 3rem; color: #ccc;"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ turf.name }}</h5>
+                    <p class="text-muted mb-2">
+                        <i class="bi bi-geo-alt"></i> {{ turf.location }}<br>
+                        <i class="bi bi-trophy"></i> {{ turf.get_sport_types_display }}
+                    </p>
+                    <p class="mb-2">
+                        <strong>₹{{ turf.base_price_per_hour }}/hour</strong>
+                    </p>
+                    <div class="mb-2">
+                        {% for amenity in turf.get_amenities_list %}
+                        <span class="badge bg-light text-dark">{{ amenity|title }}</span>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'turf_detail' turf.turf_id %}" class="btn btn-primary-custom w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">No turfs found. Try adjusting your search criteria.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input, select').forEach(el => {
+        el.classList.add('form-control');
+    });
+</script>
+{% endblock %}
+
