@@ -15,17 +15,14 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-try:
-    from decouple import config
-except ImportError:
-    # Fallback to satisfy linter or environment without python-decouple
-    def config(name, default=None, cast=None):
-        val = os.environ.get(name, default)
-        if cast and val is not None:
-            if cast is bool:
-                return val.lower() in ('true', '1', 't')
-            return cast(val)
-        return val
+def config(name, default=None, cast=None):
+    """Standard OS environment helper to avoid third-party library lints."""
+    val = os.environ.get(name, default)
+    if cast and val is not None:
+        if cast is bool:
+            return str(val).lower() in ('true', '1', 't', 'yes')
+        return cast(val)
+    return val
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
