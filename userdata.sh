@@ -1,21 +1,30 @@
 #!/bin/bash
+exec > /var/log/turftime-init.log 2>&1
+echo "=== TurfTime Startup $(date) ==="
+
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y python3-pip python3-venv git libpq-dev build-essential pkg-config
 
-RDS_ENDPOINT="turftime-db.ckjsi4eykdo2.us-east-1.rds.amazonaws.com"
-
+echo "=== Cloning repo ==="
 cd /home/ubuntu
 rm -rf TurfTime
 git clone https://github.com/vivekmenon2004/TurfTime.git
 cd TurfTime
 
+echo "=== Setting up virtualenv ==="
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt gunicorn psycopg2-binary
 
+echo "=== Installing requirements ==="
+pip install --upgrade pip
+pip install -r requirements.txt gunicorn psycopg2-binary
+echo "Installed packages:"
+pip list
+
+echo "=== Setting env vars ==="
 export USE_POSTGRES=true
-export DB_HOST="$RDS_ENDPOINT"
+export DB_HOST="turftime-db.ckjsi4eykdo2.us-east-1.rds.amazonaws.com"
 export DB_NAME=turftimedb
 export DB_USER=turftimeadmin
 export DB_PASSWORD=TurfTime2026Secure
@@ -23,9 +32,18 @@ export DB_PORT=5432
 export ALLOWED_HOSTS="*"
 export DEBUG=false
 
-python manage.py migrate --noinput || echo "Migrations failed, continuing..."
-python manage.py collectstatic --noinput || echo "Collectstatic failed, continuing..."
+echo "=== Testing Django import ==="
+python -c "import django; print('Django version:', django.__version__)"
 
+echo "=== Running migrations ==="
+python manage.py migrate --noinput
+echo "Migrations done"
+
+echo "=== Collecting static files ==="
+python manage.py collectstatic --noinput
+echo "Static files done"
+
+echo "=== Writing Gunicorn service ==="
 cat > /etc/systemd/system/gunicorn.service <<EOT
 [Unit]
 Description=TurfTime Gunicorn
@@ -50,7 +68,10 @@ RestartSec=10
 WantedBy=multi-user.target
 EOT
 
+echo "=== Starting Gunicorn ==="
 systemctl daemon-reload
 systemctl enable gunicorn
 systemctl start gunicorn
-echo "Deployment complete"
+echo "Gunicorn status:"
+systemctl status gunicorn --no-pager
+echo "=== Startup complete ==="
