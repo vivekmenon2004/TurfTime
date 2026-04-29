@@ -1,12 +1,12 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.utils import timezone
-from datetime import datetime, time
-import qrcode
-from io import BytesIO
-from django.core.files.base import ContentFile
-import PIL
+from django.db import models # type: ignore
+from django.contrib.auth.models import AbstractUser # type: ignore
+from django.core.validators import MinValueValidator, MaxValueValidator # type: ignore
+from django.utils import timezone # type: ignore
+from datetime import datetime, time # type: ignore
+import qrcode # type: ignore
+from io import BytesIO # type: ignore
+from django.core.files.base import ContentFile # type: ignore
+import PIL # type: ignore
 
 
 class CustomUser(AbstractUser):
@@ -101,7 +101,7 @@ class Turf(models.Model):
         """Return comma-separated sport names for display"""
         return ', '.join(s.name for s in self.sports.all())
 
-    get_sport_types_display.short_description = 'Sport Types'
+    get_sport_types_display.short_description = 'Sport Types' # type: ignore
     
     def calculate_price(self, start_time, end_time, date):
         """
@@ -156,7 +156,7 @@ class Turf(models.Model):
         else:
             total_price = base_price * (float(self.weekend_multiplier) if is_weekend else 1.0)
         
-        return round(total_price, 2)
+        return round(total_price, 2) # type: ignore
 
 
 class TurfImage(models.Model):

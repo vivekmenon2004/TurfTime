@@ -1,18 +1,18 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib import messages
-from django.db.models import Q, Sum, Count, Avg
-from django.utils import timezone
-from django.http import JsonResponse, HttpResponse
-from django.core.mail import send_mail
-from django.conf import settings
-from datetime import date as date_obj, datetime, timedelta
-import requests
-import json
+from django.shortcuts import render, redirect, get_object_or_404 # type: ignore
+from django.contrib.auth import login, logout # type: ignore
+from django.contrib.auth.decorators import login_required, user_passes_test # type: ignore
+from django.contrib import messages # type: ignore
+from django.db.models import Q, Sum, Count, Avg # type: ignore
+from django.utils import timezone # type: ignore
+from django.http import JsonResponse, HttpResponse # type: ignore
+from django.core.mail import send_mail # type: ignore
+from django.conf import settings # type: ignore
+from datetime import date as date_obj, datetime, timedelta # type: ignore
+import requests # type: ignore
+import json # type: ignore
 
-from .models import CustomUser, Turf, Booking, Review, BlockedSlot, AuditLog, TurfImage
-from .forms import (
+from .models import CustomUser, Turf, Booking, Review, BlockedSlot, AuditLog, TurfImage # type: ignore
+from .forms import ( # type: ignore
     CustomUserCreationForm, TurfForm, BookingForm, ReviewForm, 
     BlockedSlotForm, TurfSearchForm, TurfImageForm
 )
@@ -63,7 +63,7 @@ def login_view(request):
         return redirect('dashboard')
     
     if request.method == 'POST':
-        from django.contrib.auth import authenticate
+        from django.contrib.auth import authenticate # type: ignore
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
@@ -210,6 +210,14 @@ def admin_dashboard(request):
         payment_status='PAID'
     ).aggregate(total=Sum('total_price'))['total'] or 0
     
+    # Chart Data
+    # Revenue by Turf (Top 5)
+    turf_revenue = Turf.objects.annotate(
+        revenue=Sum('bookings__total_price', filter=Q(bookings__status__in=['CONFIRMED', 'COMPLETED'], bookings__payment_status='PAID'))
+    ).order_by('-revenue')[:5]
+    
+    sport_counts = list(Booking.objects.values('sport__name').annotate(count=Count('sport')))
+    
     context = {
         'pending_turfs': pending_turfs_count,
         'pending_turfs_list': pending_turfs_list,
@@ -220,6 +228,10 @@ def admin_dashboard(request):
         'total_revenue': total_revenue,
         'current_status': status_filter,
         'current_date': date_filter,
+        'revenue_labels': json.dumps([t.name for t in turf_revenue]),
+        'revenue_data': json.dumps([float(t.revenue or 0) for t in turf_revenue]),
+        'sport_labels': json.dumps([item['sport__name'] or 'Unknown' for item in sport_counts]),
+        'sport_data': json.dumps([item['count'] for item in sport_counts]),
     }
     return render(request, 'bookings/admin_dashboard.html', context)
 
@@ -796,7 +808,7 @@ def revenue_report(request):
 def download_excel(request):
     """Download full bookings as Excel (CSV format)"""
     import csv
-    from django.http import HttpResponse
+    from django.http import HttpResponse # type: ignore
     
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="bookings_report.csv"'
@@ -825,14 +837,14 @@ def download_excel(request):
 def download_pdf(request):
     """Download full bookings as PDF using xhtml2pdf"""
     try:
-        from xhtml2pdf import pisa
+        from xhtml2pdf import pisa # type: ignore
     except ImportError:
         messages.error(request, 'PDF generation library (xhtml2pdf) is not installed.')
         return redirect('dashboard')
         
     import io
-    from django.http import HttpResponse
-    from django.template.loader import get_template
+    from django.http import HttpResponse # type: ignore
+    from django.template.loader import get_template # type: ignore
     
     bookings = Booking.objects.all().order_by('-created_at')
     context = {'bookings': bookings}

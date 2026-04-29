@@ -1,6 +1,6 @@
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import CustomUser, Turf, TurfImage, Booking, Review, BlockedSlot, AuditLog, Sport, Amenity
+from django.contrib import admin # type: ignore
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin # type: ignore
+from .models import CustomUser, Turf, TurfImage, Booking, Review, BlockedSlot, AuditLog, Sport, Amenity # type: ignore
 
 admin.site.register(Sport)
 admin.site.register(Amenity)

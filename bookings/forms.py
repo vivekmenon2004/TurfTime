@@ -1,8 +1,8 @@
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser, Turf, Booking, Review, BlockedSlot, TurfImage, Sport, Amenity
-from django.core.exceptions import ValidationError
-from datetime import date as date_obj, time, datetime
+from django import forms # type: ignore
+from django.contrib.auth.forms import UserCreationForm # type: ignore
+from .models import CustomUser, Turf, Booking, Review, BlockedSlot, TurfImage, Sport, Amenity # type: ignore
+from django.core.exceptions import ValidationError # type: ignore
+from datetime import date as date_obj, time, datetime # type: ignore
 
 
 class CustomUserCreationForm(UserCreationForm):
